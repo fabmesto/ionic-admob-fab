@@ -1,0 +1,51 @@
+{
+  "author": {
+    "name": "Fabrizio Mesto"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Ionic Admob Services",
+  "devDependencies": {
+    "@angular/cli": "11.0.4",
+    "@angular/common": "~11.0.4",
+    "@angular/compiler": "~11.0.4",
+    "@angular/compiler-cli": "~11.0.4",
+    "@angular/core": "~11.0.4",
+    "@angular/forms": "~11.0.4",
+    "@angular/platform-browser": "~11.0.4",
+    "@angular/platform-browser-dynamic": "~11.0.4",
+    "@angular/router": "~11.0.4",
+    "@auth0/angular-jwt": "^5.0.1",
+    "@capacitor-community/admob": "^1.2.5",
+    "@capacitor-community/http": "^0.2.1",
+    "@capacitor/core": "^2.4.2",
+    "@ionic-native/core": "^5.29.0",
+    "@ionic-native/in-app-purchase-2": "^5.29.0",
+    "@ionic/angular": "^5.4.0",
+    "@types/node": "^12.11.1",
+    "ionic-wp": "0.0.8",
+    "moment": "^2.27.0",
+    "rxjs": "~6.6.3",
+    "typescript": "~4.0.5",
+    "zone.js": "~0.10.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://netedit.it",
+  "keywords": [],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "name": "ionic-admob-fab",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabmesto/ionic-admob-fab.git"
+  },
+  "scripts": {
+    "build": "rm -rf dist && npm run ngc",
+    "ngc": "ngc",
+    "publishPackage": "npm run build && npm publish"
+  },
+  "typings": "./dist/index.d.ts",
+  "version": "0.0.1"
+}
