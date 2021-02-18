@@ -16,7 +16,7 @@
     "@angular/platform-browser-dynamic": "~11.0.4",
     "@angular/router": "~11.0.4",
     "@auth0/angular-jwt": "^5.0.1",
-    "@capacitor-community/admob": "^1.2.5",
+    "@capacitor-community/admob": "^1.3.0",
     "@capacitor-community/http": "^0.2.1",
     "@capacitor/core": "^2.4.2",
     "@ionic-native/core": "^5.29.0",
@@ -47,5 +47,5 @@
     "publishPackage": "npm run build && npm publish"
   },
   "typings": "./dist/index.d.ts",
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
