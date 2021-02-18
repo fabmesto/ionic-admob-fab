@@ -1,4 +1,5 @@
 {
+  "version": "0.0.3",
   "author": {
     "name": "Fabrizio Mesto"
   },
@@ -32,14 +33,13 @@
   "files": [
     "dist"
   ],
-  "homepage": "https://netedit.it",
   "keywords": [],
   "license": "MIT",
   "main": "./dist/index.js",
   "name": "ionic-admob-fab",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fabmesto/ionic-admob-fab.git"
+    "url": "https://github.com/fabmesto/ionic-admob-fab.git"
   },
   "scripts": {
     "build": "rm -rf dist && npm run ngc",
@@ -47,5 +47,8 @@
     "publishPackage": "npm run build && npm publish"
   },
   "typings": "./dist/index.d.ts",
-  "version": "0.0.2"
+  "bugs": {
+    "url": "https://github.com/fabmesto/ionic-admob-fab/issues"
+  },
+  "homepage": "https://github.com/fabmesto/ionic-admob-fab"
 }
