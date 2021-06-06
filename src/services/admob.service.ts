@@ -12,27 +12,28 @@ const { AdMob } = Plugins;
 export class AdmobService {
 
   nascondiADV = false;
-  defaulCacheTime = 60 * 5;
+  defaulCacheTime = (60 * 5);
   optionsBanner: AdOptions;
   optionsInterstitial: AdOptions;
   optionsRewardvideo: AdOptions;
 
   admob: {
-    ios: '',
-    android: '',
+    ios: 'ios',
+    android: 'android',
     banner: {
-      'ios': '',
-      'android': '',
+      'ios': 'ios',
+      'android': 'android',
     },
     interstitial: {
-      'ios': '',
-      'android': '',
+      'ios': 'ios',
+      'android': 'android',
     },
     rewardVideo: {
-      'ios': '',
-      'android': '',
+      'ios': 'ios',
+      'android': 'android',
     }
   };
+
   inAppProductId = '';
 
   private appMargin = 0;
