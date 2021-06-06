@@ -4,6 +4,7 @@ import { AdOptions, AdSize, AdPosition, AdMobRewardItem, AdMobInitializationOpti
 import { Plugins, Capacitor, PluginListenerHandle } from '@capacitor/core';
 import { Subject } from 'rxjs';
 import { AcquistiValidatorService } from './acquisti-validator.service';
+import { admobInterface } from './admobInterface';
 const { AdMob } = Plugins;
 
 @Injectable({
@@ -17,24 +18,9 @@ export class AdmobService {
   optionsInterstitial: AdOptions;
   optionsRewardvideo: AdOptions;
 
-  admob: {
-    ios: 'ios',
-    android: 'android',
-    banner: {
-      'ios': 'ios',
-      'android': 'android',
-    },
-    interstitial: {
-      'ios': 'ios',
-      'android': 'android',
-    },
-    rewardVideo: {
-      'ios': 'ios',
-      'android': 'android',
-    }
-  };
+  admob: admobInterface;
 
-  inAppProductId = '';
+  inAppProductId: string = '';
 
   private appMargin = 0;
   private bannerPosition: 'top' | 'bottom';
