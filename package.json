@@ -1,5 +1,5 @@
 {
-  "version": "0.1.9",
+  "version": "0.3.0",
   "author": {
     "name": "Fabrizio Mesto"
   },
@@ -17,17 +17,17 @@
     "@angular/platform-browser-dynamic": "~11.2.12",
     "@angular/router": "~11.2.12",
     "@auth0/angular-jwt": "^5.0.1",
-    "@capacitor-community/admob": "^1.3.4",
-    "@capacitor-community/http": "^0.3.2",
-    "@capacitor/core": "^2.4.7",
+    "@capacitor-community/admob": "^3.0.1",
+    "@capacitor-community/http": "^1.0.0",
+    "@capacitor/core": "^3.0.1",
     "@ionic-native/core": "^5.32.1",
     "@ionic-native/in-app-purchase-2": "^5.32.1",
     "@ionic/angular": "^5.6.8",
     "@types/node": "^12.11.1",
-    "ionic-wp": "^0.1.5",
-    "moment": "^2.27.0",
+    "ionic-wp": "^0.3.0",
+    "moment": "^2.29.1",
     "rxjs": "~6.6.3",
-    "typescript": "~4.0.5",
+    "typescript": "^4.0.8",
     "zone.js": "~0.10.2"
   },
   "files": [
@@ -50,5 +50,10 @@
   "bugs": {
     "url": "https://github.com/fabmesto/ionic-admob-fab/issues"
   },
-  "homepage": "https://github.com/fabmesto/ionic-admob-fab"
+  "homepage": "https://github.com/fabmesto/ionic-admob-fab",
+  "dependencies": {
+    "@capacitor/cli": "^3.0.1",
+    "@capacitor/device": "^1.0.1",
+    "@capacitor/dialog": "^1.0.1"
+  }
 }

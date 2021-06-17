@@ -3,9 +3,8 @@ import { Platform } from '@ionic/angular';
 import { acquistoModel } from './acquistoModel';
 import { WordpressService } from 'ionic-wp';
 import * as moment from 'moment';
-import { Plugins } from '@capacitor/core';
 import { InAppPurchase2 } from '@ionic-native/in-app-purchase-2/ngx';
-const { Modals } = Plugins;
+import { Dialog } from '@capacitor/dialog';
 
 @Injectable({
   providedIn: 'root'
@@ -268,7 +267,7 @@ export class AcquistiValidatorService {
               // abbonamento scaduto
               if (avvisato == false) {
                 this.setLocal([]);
-                await Modals.alert({
+                await Dialog.alert({
                   title: 'Abbonamento scaduto',
                   message: 'L\'abbonamento "Nessuna pubblicità" è scaduto o non è stato rinnovato automaticamente.\n Vai nella pagina "Acquisti in-app" per ripristinarlo o acquistarlo nuovamente',
                 });
@@ -280,7 +279,7 @@ export class AcquistiValidatorService {
           // vecchio formato
           if (avvisato == false) {
             this.setLocal([]);
-            await Modals.alert({
+            await Dialog.alert({
               title: 'Abbonamento da ripristinare',
               message: 'L\'abbonamento "Nessuna pubblicità" al quale sei regolarmente iscritto va ripristinato.\n Vai nella pagina "Acquisti in-app" e clicca su RIPRISTINA ACQUISTI',
             });

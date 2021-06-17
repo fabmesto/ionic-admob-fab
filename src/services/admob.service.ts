@@ -1,11 +1,12 @@
 import { CacheService } from 'ionic-wp';
 import { Injectable } from '@angular/core';
-import { AdOptions, AdSize, AdPosition, AdMobRewardItem, AdMobInitializationOptions } from '@capacitor-community/admob';
-import { Plugins, Capacitor, PluginListenerHandle } from '@capacitor/core';
+import { AdMob, BannerAdOptions, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, AdMobBannerSize, AdMobRewardItem, InterstitialAdPluginEvents, AdLoadInfo, RewardAdPluginEvents } from '@capacitor-community/admob';
+
 import { Subject } from 'rxjs';
 import { AcquistiValidatorService } from './acquisti-validator.service';
 import { admobInterface } from './admobInterface';
-const { AdMob } = Plugins;
+import { Device, DeviceInfo } from '@capacitor/device';
+import { PluginListenerHandle } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +15,9 @@ export class AdmobService {
 
   nascondiADV = false;
   defaulCacheTime = (60 * 5);
-  optionsBanner: AdOptions;
-  optionsInterstitial: AdOptions;
-  optionsRewardvideo: AdOptions;
+  optionsBanner: BannerAdOptions;
+  optionsInterstitial: BannerAdOptions;
+  optionsRewardvideo: BannerAdOptions;
 
   admob: admobInterface;
 
@@ -32,13 +33,13 @@ export class AdmobService {
   private eventPrepareReward: PluginListenerHandle;
   private eventRewardReceived: AdMobRewardItem;
   private isLoadingInterstitial = false;
-  private eventPrepareInterstitial;
   public isPrepareBanner = false;
   public isPrepareReward = false;
   public isPrepareInterstitial = false;
   public premioRicevutoEvent = new Subject();
   public premioAggiornatoEvent = new Subject();
   public premioUsatoEvent = new Subject();
+  public infoDevice: DeviceInfo;
 
   constructor(
     public cache: CacheService,
@@ -47,13 +48,15 @@ export class AdmobService {
     this.nascondiADV = false;
   }
 
-  init() {
+  async init() {
     this.nascondiADV = this.acquistiService.isValidLocalPurchase(this.inAppProductId);
     if (this.nascondiADV == false) {
-      if (Capacitor.platform !== 'web') {
+      this.infoDevice = await Device.getInfo();
+      if (this.infoDevice.platform !== 'web') {
         AdMob.initialize({
           requestTrackingAuthorization: true,
-        } as AdMobInitializationOptions);
+          initializeForTesting: false,
+        });
 
         this.bannerRegisterEvents();
         this.rewardRegisterEvents();
@@ -72,7 +75,7 @@ export class AdmobService {
 
   prepareConfigs() {
     if (this.nascondiADV == false) {
-      if (Capacitor.platform !== 'web') {
+      if (this.infoDevice.platform !== 'web') {
         this.prepareConfigBanner();
         this.prepareConfigRewardvideo();
         // this.prepareConfigInterstitial();
@@ -97,7 +100,7 @@ export class AdmobService {
    */
   bannerRegisterEvents() {
     this.bannerPosition = 'bottom';
-    this.eventOnAdSize = AdMob.addListener('onAdSize', (info: any) => {
+    this.eventOnAdSize = AdMob.addListener(BannerAdPluginEvents.SizeChanged, (info: any) => {
       this.appMargin = parseInt(info.height, 10);
       if (this.appMargin > 0) {
         const app: HTMLElement = document.querySelector('ion-router-outlet');
@@ -115,26 +118,26 @@ export class AdmobService {
       }
     });
     // Subscibe Banner Event Listener
-    AdMob.addListener('onAdLoaded', (info: boolean) => {
-      console.log('Banner Ad Loaded', info);
+    AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+      console.log('Banner Ad Loaded');
     });
   }
 
   prepareConfigBanner() {
-    if (Capacitor.platform == 'ios') {
+    if (this.infoDevice.platform == 'ios') {
       this.optionsBanner = {
         adId: this.admob.banner.ios,
-        adSize: AdSize.SMART_BANNER,
-        position: AdPosition.BOTTOM_CENTER,
+        adSize: BannerAdSize.ADAPTIVE_BANNER,
+        position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
         isTesting: false,
       };
     }
-    if (Capacitor.platform == 'android') {
+    if (this.infoDevice.platform == 'android') {
       this.optionsBanner = {
         adId: this.admob.banner.android,
-        adSize: AdSize.SMART_BANNER,
-        position: AdPosition.BOTTOM_CENTER,
+        adSize: BannerAdSize.ADAPTIVE_BANNER,
+        position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
         isTesting: false,
       };
@@ -143,14 +146,14 @@ export class AdmobService {
 
   showBanner() {
     if (this.nascondiADV == false) {
-      if (Capacitor.platform !== 'web') {
+      if (this.infoDevice.platform !== 'web') {
         AdMob.showBanner(this.optionsBanner);
       }
     }
   }
 
   async removeBanner() {
-    if (Capacitor.platform !== 'web') {
+    if (this.infoDevice.platform !== 'web') {
       const result = await AdMob.removeBanner().catch(e => console.log(e));
       if (result === undefined) {
         return;
@@ -163,7 +166,7 @@ export class AdmobService {
   }
 
   async hideBanner() {
-    if (Capacitor.platform !== 'web') {
+    if (this.infoDevice.platform !== 'web') {
       const result = await AdMob.hideBanner()
         .catch(e => console.log(e));
       if (result === undefined) {
@@ -177,7 +180,7 @@ export class AdmobService {
   }
 
   async resumeBanner() {
-    if (this.nascondiADV == false && Capacitor.platform !== 'web') {
+    if (this.nascondiADV == false && this.infoDevice.platform !== 'web') {
       const result = await AdMob.resumeBanner()
         .catch(e => console.log(e));
       if (result === undefined) {
@@ -204,13 +207,13 @@ export class AdmobService {
    * ==================== Interstitial ====================
    */
   interstitialRegisterEvents() {
-    AdMob.addListener('onInterstitialAdLoaded', (info) => {
+    AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
       this.isPrepareInterstitial = true;
     });
   }
 
   isTimeForInterstitial(): boolean {
-    if (this.nascondiADV === false && Capacitor.platform !== 'web') {
+    if (this.nascondiADV === false && this.infoDevice.platform !== 'web') {
       const time = this.getTime('lastinterstitial_time');
       if (!this.cache.isValidTime(time)) {
         return true;
@@ -220,17 +223,17 @@ export class AdmobService {
   }
 
   async prepareConfigInterstitial() {
-    if (Capacitor.platform == 'ios') {
+    if (this.infoDevice.platform == 'ios') {
       this.optionsInterstitial = {
         adId: this.admob.interstitial.ios,
       }
     }
-    if (Capacitor.platform == 'android') {
+    if (this.infoDevice.platform == 'android') {
       this.optionsInterstitial = {
         adId: this.admob.interstitial.android,
       }
     }
-    if (this.isLoadingInterstitial == false && Capacitor.platform !== 'web') {
+    if (this.isLoadingInterstitial == false && this.infoDevice.platform !== 'web') {
       this.isLoadingInterstitial = true;
       const result = AdMob.prepareInterstitial(this.optionsInterstitial)
         .catch(e => console.log(e))
@@ -269,15 +272,16 @@ export class AdmobService {
    * ==================== REWARD ====================
    */
   rewardRegisterEvents() {
-    this.eventPrepareReward = AdMob.addListener('onRewardedVideoAdLoaded', (info: boolean) => {
+    this.eventPrepareReward = AdMob.addListener(RewardAdPluginEvents.Loaded, (info: AdLoadInfo) => {
       this.isPrepareReward = true;
     });
 
-    AdMob.addListener('onRewarded', async (info) => {
-      this.eventRewardReceived = info;
+    AdMob.addListener(RewardAdPluginEvents.Showed, async () => {
+      
     });
 
-    AdMob.addListener('onRewardedVideoAdClosed', async (info) => {
+    AdMob.addListener(RewardAdPluginEvents.Rewarded, async (info) => {
+      this.eventRewardReceived = info;
       if (this.eventRewardReceived) {
         this.aggiungiPremio(this.eventRewardReceived.amount);
         this.prepareConfigRewardvideo();
@@ -286,18 +290,18 @@ export class AdmobService {
   }
 
   async prepareConfigRewardvideo() {
-    if (Capacitor.platform == 'ios') {
+    if (this.infoDevice.platform == 'ios') {
       this.optionsRewardvideo = {
         adId: this.admob.rewardVideo.ios
       };
     }
-    if (Capacitor.platform == 'android') {
+    if (this.infoDevice.platform == 'android') {
       // storico
       this.optionsRewardvideo = {
         adId: this.admob.rewardVideo.android
       };
     }
-    if (Capacitor.platform !== 'web') {
+    if (this.infoDevice.platform !== 'web') {
       const result = await AdMob.prepareRewardVideoAd(this.optionsRewardvideo)
         .catch(e => console.log(e))
         .finally(() => {
