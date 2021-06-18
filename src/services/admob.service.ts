@@ -1,6 +1,18 @@
 import { CacheService } from 'ionic-wp';
 import { Injectable } from '@angular/core';
-import { AdMob, BannerAdOptions, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, AdMobBannerSize, AdMobRewardItem, InterstitialAdPluginEvents, AdLoadInfo, RewardAdPluginEvents } from '@capacitor-community/admob';
+import {
+  AdMob,
+  BannerAdOptions,
+  BannerAdSize,
+  BannerAdPosition,
+  BannerAdPluginEvents,
+  AdMobBannerSize,
+  AdMobRewardItem,
+  InterstitialAdPluginEvents,
+  AdLoadInfo,
+  RewardAdPluginEvents,
+  AdOptions
+} from '@capacitor-community/admob';
 
 import { Subject } from 'rxjs';
 import { AcquistiValidatorService } from './acquisti-validator.service';
@@ -16,8 +28,8 @@ export class AdmobService {
   nascondiADV = false;
   defaulCacheTime = (60 * 5);
   optionsBanner: BannerAdOptions;
-  optionsInterstitial: BannerAdOptions;
-  optionsRewardvideo: BannerAdOptions;
+  optionsInterstitial: AdOptions;
+  optionsRewardvideo: AdOptions;
 
   admob: admobInterface;
 
@@ -100,8 +112,8 @@ export class AdmobService {
    */
   bannerRegisterEvents() {
     this.bannerPosition = 'bottom';
-    this.eventOnAdSize = AdMob.addListener(BannerAdPluginEvents.SizeChanged, (info: any) => {
-      this.appMargin = parseInt(info.height, 10);
+    this.eventOnAdSize = AdMob.addListener(BannerAdPluginEvents.SizeChanged, (size: AdMobBannerSize) => {
+      this.appMargin = size.height;
       if (this.appMargin > 0) {
         const app: HTMLElement = document.querySelector('ion-router-outlet');
         // const app: HTMLElement = document.querySelector('ion-app');
@@ -277,7 +289,7 @@ export class AdmobService {
     });
 
     AdMob.addListener(RewardAdPluginEvents.Showed, async () => {
-      
+
     });
 
     AdMob.addListener(RewardAdPluginEvents.Rewarded, async (info) => {
