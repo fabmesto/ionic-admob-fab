@@ -19,11 +19,25 @@ import { AcquistiValidatorService } from './acquisti-validator.service';
 import { admobInterface } from './admobInterface';
 import { Device, DeviceInfo } from '@capacitor/device';
 import { PluginListenerHandle } from '@capacitor/core';
+import { ReplaySubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdmobService {
+
+  /* NEW start */
+  private readonly lastBannerEvent$$ = new ReplaySubject<{ name: string, value: any }>(1);
+  public readonly lastBannerEvent$ = this.lastBannerEvent$$.asObservable()
+
+  private readonly lastRewardEvent$$ = new ReplaySubject<{ name: string, value: any }>(1);
+  public readonly lastRewardEvent$ = this.lastRewardEvent$$.asObservable()
+
+  private readonly lastInterstitialEvent$$ = new ReplaySubject<{ name: string, value: any }>(1);
+  public readonly lastInterstitialEvent$ = this.lastInterstitialEvent$$.asObservable()
+
+  private readonly listenerHandlers: PluginListenerHandle[] = [];
+  /* NEW end */
 
   nascondiADV = false;
   defaulCacheTime = (60 * 5);
@@ -42,6 +56,7 @@ export class AdmobService {
    * for EventListener
    */
   private eventOnAdSize;
+
   private eventPrepareReward: PluginListenerHandle;
   private eventRewardReceived: AdMobRewardItem;
   private isLoadingInterstitial = false;
@@ -70,9 +85,9 @@ export class AdmobService {
           initializeForTesting: false,
         });
 
-        this.bannerRegisterEvents();
-        this.rewardRegisterEvents();
-        this.interstitialRegisterEvents();
+        this.registerRewardListeners();
+        this.registerBannerListeners();
+        this.registerInterstitialListeners();
 
         setTimeout(() => {
           this.acquistiService.validatorLocalPurchase(this.callbackValidator, this.inAppProductId);
@@ -83,6 +98,78 @@ export class AdmobService {
         }, 6000);
       }
     }
+  }
+
+
+  private registerInterstitialListeners(): void {
+    const eventKeys = Object.keys(InterstitialAdPluginEvents);
+
+    eventKeys.forEach(key => {
+      console.log(`registering ${InterstitialAdPluginEvents[key]}`);
+      const handler = AdMob.addListener(InterstitialAdPluginEvents[key], (value) => {
+        console.log(`Interstitial Event "${key}"`, value);
+
+        this.lastInterstitialEvent$$.next({ name: key, value: value });
+
+      });
+      this.listenerHandlers.push(handler);
+    });
+  }
+
+  private registerRewardListeners(): void {
+    const eventKeys = Object.keys(RewardAdPluginEvents);
+
+    eventKeys.forEach(key => {
+      console.log(`registering ${RewardAdPluginEvents[key]}`);
+      const handler = AdMob.addListener(RewardAdPluginEvents[key], (value) => {
+        console.log(`Reward Event "${key}"`, value);
+
+        this.lastRewardEvent$$.next({ name: key, value: value });
+
+      });
+      this.listenerHandlers.push(handler);
+    });
+  }
+
+  private registerBannerListeners(): void {
+    const resizeHandler = AdMob.addListener(BannerAdPluginEvents.SizeChanged, (info: AdMobBannerSize) => {
+      this.appMargin = info.height;
+      const app: HTMLElement = document.querySelector('ion-router-outlet');
+
+      if (this.appMargin === 0) {
+        app.style.marginTop = '';
+        return;
+      }
+
+      if (this.appMargin > 0) {
+        const body = document.querySelector('body');
+        const bodyStyles = window.getComputedStyle(body);
+        const safeAreaBottom = bodyStyles.getPropertyValue("--ion-safe-area-bottom");
+
+
+        if (this.bannerPosition === 'top') {
+          app.style.marginTop = this.appMargin + 'px';
+        } else {
+          app.style.marginBottom = `calc(${safeAreaBottom} + ${this.appMargin}px)`;
+        }
+      }
+    });
+
+    this.listenerHandlers.push(resizeHandler);
+
+    const eventKeys = Object.keys(BannerAdPluginEvents);
+
+    eventKeys.forEach(key => {
+      console.log(`registering ${BannerAdPluginEvents[key]}`);
+      const handler = AdMob.addListener(BannerAdPluginEvents[key], (value) => {
+        console.log(`Banner Event "${key}"`, value);
+
+        this.lastBannerEvent$$.next({ name: key, value: value });
+
+      });
+      this.listenerHandlers.push(handler);
+
+    });
   }
 
   prepareConfigs() {
@@ -107,34 +194,6 @@ export class AdmobService {
     }
   }
 
-  /**
-   * ==================== Banner ====================
-   */
-  bannerRegisterEvents() {
-    this.bannerPosition = 'bottom';
-    this.eventOnAdSize = AdMob.addListener(BannerAdPluginEvents.SizeChanged, (size: AdMobBannerSize) => {
-      this.appMargin = size.height;
-      if (this.appMargin > 0) {
-        const app: HTMLElement = document.querySelector('ion-router-outlet');
-        // const app: HTMLElement = document.querySelector('ion-app');
-        if (this.bannerPosition === 'top') {
-          app.style.marginTop = this.appMargin + 'px';
-        } else {
-          const body = document.querySelector('body');
-          const bodyStyles = window.getComputedStyle(body);
-          const safeAreaBottom = bodyStyles.getPropertyValue('--ion-safe-area-bottom');
-
-          app.style.marginBottom = `calc(${safeAreaBottom} + ${this.appMargin}px)`;
-          // app.style.marginBottom = this.appMargin + safeAreaBottom + 'px';
-        }
-      }
-    });
-    // Subscibe Banner Event Listener
-    AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
-      console.log('Banner Ad Loaded');
-    });
-  }
-
   prepareConfigBanner() {
     if (this.infoDevice.platform == 'ios') {
       this.optionsBanner = {
@@ -156,24 +215,34 @@ export class AdmobService {
     }
   }
 
-  showBanner() {
+  async showBanner() {
     if (this.nascondiADV == false) {
       if (this.infoDevice.platform !== 'web') {
-        AdMob.showBanner(this.optionsBanner);
+        console.log('Requesting banner with this options', this.optionsBanner);
+
+        const result = await AdMob.showBanner(this.optionsBanner).
+          catch(e => console.error(e));
+
+        if (result === undefined) {
+          return;
+        }
+        this.isPrepareBanner = true;
       }
     }
   }
 
   async removeBanner() {
     if (this.infoDevice.platform !== 'web') {
-      const result = await AdMob.removeBanner().catch(e => console.log(e));
+      const result = await AdMob.removeBanner()
+        .catch(e => console.log(e));
       if (result === undefined) {
         return;
       }
 
       const app: HTMLElement = document.querySelector('ion-router-outlet');
-      app.style.marginTop = '0px';
       app.style.marginBottom = '0px';
+      this.appMargin = 0;
+      this.isPrepareBanner = false;
     }
   }
 
@@ -200,15 +269,7 @@ export class AdmobService {
       }
 
       const app: HTMLElement = document.querySelector('ion-router-outlet');
-      const body = document.querySelector('body');
-      const bodyStyles = window.getComputedStyle(body);
-      const safeAreaBottom = bodyStyles.getPropertyValue('--ion-safe-area-bottom');
-
-      if (this.bannerPosition === 'top') {
-        app.style.marginTop = this.appMargin + 'px';
-      } else {
-        app.style.marginBottom = `calc(${safeAreaBottom} + ${this.appMargin}px)`;
-      }
+      app.style.marginBottom = this.appMargin + 'px';
     }
   }
   /**
@@ -219,9 +280,10 @@ export class AdmobService {
    * ==================== Interstitial ====================
    */
   interstitialRegisterEvents() {
-    AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
+    const handler = AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
       this.isPrepareInterstitial = true;
     });
+    this.listenerHandlers.push(handler);
   }
 
   isTimeForInterstitial(): boolean {
@@ -246,12 +308,15 @@ export class AdmobService {
       }
     }
     if (this.isLoadingInterstitial == false && this.infoDevice.platform !== 'web') {
-      this.isLoadingInterstitial = true;
-      const result = AdMob.prepareInterstitial(this.optionsInterstitial)
-        .catch(e => console.log(e))
-        .finally(() => { this.isLoadingInterstitial = false });
-      if (result === undefined) {
-        return;
+      try {
+        const result = await AdMob.prepareInterstitial(this.optionsInterstitial);
+        console.log('Interstitial Prepared', result);
+        this.isPrepareInterstitial = true;
+        
+      } catch (e) {
+        console.error('There was a problem preparing the Interstitial', e);
+      } finally {
+        this.isLoadingInterstitial = false;
       }
     }
   }
@@ -291,6 +356,7 @@ export class AdmobService {
     AdMob.addListener(RewardAdPluginEvents.Showed, async () => {
 
     });
+
 
     AdMob.addListener(RewardAdPluginEvents.Rewarded, async (info) => {
       this.eventRewardReceived = info;
