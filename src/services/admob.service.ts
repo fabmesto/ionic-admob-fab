@@ -61,6 +61,7 @@ export class AdmobService {
   public premioRicevutoEvent = new Subject();
   public premioAggiornatoEvent = new Subject();
   public premioUsatoEvent = new Subject();
+  public isPrepareReward = false;
 
   constructor(
     public cache: CacheService,
@@ -117,6 +118,7 @@ export class AdmobService {
     const rewardLoadedHandler = AdMob.addListener(RewardAdPluginEvents.Loaded, (info: AdLoadInfo) => {
       // Subscribe prepared rewardVideo
       console.log('rewardLoaded', info);
+      this.isPrepareReward = true;
     });
 
     const rewardedHandler = AdMob.addListener(RewardAdPluginEvents.Rewarded, (rewardItem: AdMobRewardItem) => {
@@ -124,7 +126,7 @@ export class AdmobService {
       this.ngZone.run(() => {
         this.aggiungiPremio(rewardItem.amount);
       });
-      console.log('rewarded', rewardItem);
+      this.prepareConfigRewardvideo();
     });
 
     this.listenerHandlers.push(rewardLoadedHandler);
@@ -180,6 +182,7 @@ export class AdmobService {
     if (this.nascondiADV == false) {
       if (this.platform.is('android') || this.platform.is('ios')) {
         this.prepareConfigBanner();
+        this.prepareConfigRewardvideo();
         // this.prepareConfigInterstitial();
       }
     }
@@ -351,26 +354,32 @@ export class AdmobService {
   /*
    * ==================== REWARD ====================
    */
+  async prepareConfigRewardvideo() {
+    if (this.platform.is('ios')) {
+      this.optionsRewardvideo = {
+        adId: this.admob.rewardVideo.ios
+      };
+    }
+    if (this.platform.is('android')) {
+      // storico
+      this.optionsRewardvideo = {
+        adId: this.admob.rewardVideo.android
+      };
+    }
+
+    await AdMob.prepareRewardVideoAd(this.optionsRewardvideo);
+    return true;
+  }
+
   async showRewardvideo(ignoreTime: boolean = false): Promise<any> {
     if (this.nascondiADV == false) {
       if (this.isTimeForInterstitial() || ignoreTime) {
-
-        if (this.platform.is('ios')) {
-          this.optionsRewardvideo = {
-            adId: this.admob.rewardVideo.ios
-          };
+        if (!this.isPrepareReward) {
+          await this.prepareConfigRewardvideo();
         }
-        if (this.platform.is('android')) {
-          // storico
-          this.optionsRewardvideo = {
-            adId: this.admob.rewardVideo.android
-          };
-        }
-
-        await AdMob.prepareRewardVideoAd(this.optionsRewardvideo);
         const rewardItem = await AdMob.showRewardVideoAd();
-
         this.saveTime('lastinterstitial_time');
+        this.isPrepareReward = false;
 
         return true;
       }
