@@ -26,18 +26,7 @@ import { ReplaySubject } from 'rxjs';
 })
 export class AdmobService {
 
-  /* NEW start */
-  private readonly lastBannerEvent$$ = new ReplaySubject<{ name: string, value: any }>(1);
-  public readonly lastBannerEvent$ = this.lastBannerEvent$$.asObservable()
-
-  private readonly lastRewardEvent$$ = new ReplaySubject<{ name: string, value: any }>(1);
-  public readonly lastRewardEvent$ = this.lastRewardEvent$$.asObservable()
-
-  private readonly lastInterstitialEvent$$ = new ReplaySubject<{ name: string, value: any }>(1);
-  public readonly lastInterstitialEvent$ = this.lastInterstitialEvent$$.asObservable()
-
   private readonly listenerHandlers: PluginListenerHandle[] = [];
-  /* NEW end */
 
   nascondiADV = false;
   defaulCacheTime = (60 * 5);
@@ -79,12 +68,12 @@ export class AdmobService {
         AdMob.initialize({
           requestTrackingAuthorization: true,
           initializeForTesting: false,
-        });
-
-        this.registerBannerSizeChanged();
-        this.registerRewardListeners();
-        this.registerBannerListeners();
-        this.registerInterstitialListeners();
+        }).then(() => {
+          this.registerBannerSizeChanged();
+          this.registerRewardListeners();
+          this.prepareConfigBanner();
+          this.prepareConfigRewardvideo();
+        })
 
         setTimeout(() => {
           this.acquistiService.validatorLocalPurchase(this.callbackValidator, this.inAppProductId);
@@ -95,23 +84,6 @@ export class AdmobService {
         }, 6000);
       }
     }
-  }
-
-  private registerInterstitialListeners(): void {
-    const eventKeys = Object.keys(InterstitialAdPluginEvents);
-
-    eventKeys.forEach(key => {
-      console.log(`registering ${InterstitialAdPluginEvents[key]}`);
-      const handler = AdMob.addListener(InterstitialAdPluginEvents[key], (value) => {
-        console.log(`Interstitial Event "${key}"`, value);
-
-        this.ngZone.run(() => {
-          this.lastInterstitialEvent$$.next({ name: key, value: value });
-        });
-
-      });
-      this.listenerHandlers.push(handler);
-    });
   }
 
   private registerRewardListeners(): void {
@@ -160,34 +132,6 @@ export class AdmobService {
     this.listenerHandlers.push(resizeHandler);
   }
 
-  private registerBannerListeners(): void {
-    const eventKeys = Object.keys(BannerAdPluginEvents);
-
-    eventKeys.forEach(key => {
-      console.log(`registering ${BannerAdPluginEvents[key]}`);
-      const handler = AdMob.addListener(BannerAdPluginEvents[key], (value) => {
-        console.log(`Banner Event "${key}"`, value);
-
-        this.ngZone.run(() => {
-          this.lastBannerEvent$$.next({ name: key, value: value });
-        });
-
-      });
-      this.listenerHandlers.push(handler);
-
-    });
-  }
-
-  public prepareConfigs(): void {
-    if (this.nascondiADV == false) {
-      if (this.platform.is('android') || this.platform.is('ios')) {
-        this.prepareConfigBanner();
-        this.prepareConfigRewardvideo();
-        // this.prepareConfigInterstitial();
-      }
-    }
-  }
-
   disableADV() {
     this.nascondiADV = true;
     this.removeBanner();
@@ -219,12 +163,13 @@ export class AdmobService {
         isTesting: false,
       };
     }
+    console.log('prepareConfigBanner con queste options', this.optionsBanner);
   }
 
   async showBanner() {
     if (this.nascondiADV == false) {
       if (this.platform.is('android') || this.platform.is('ios')) {
-        console.log('Requesting banner with this options', this.optionsBanner);
+        console.log('showBanner banner con queste options', this.optionsBanner);
 
         const result = await AdMob.showBanner(this.optionsBanner).
           catch(e => console.error(e));
@@ -306,11 +251,13 @@ export class AdmobService {
     if (this.platform.is('ios')) {
       this.optionsInterstitial = {
         adId: this.admob.interstitial.ios,
+        isTesting: false,
       }
     }
     if (this.platform.is('android')) {
       this.optionsInterstitial = {
         adId: this.admob.interstitial.android,
+        isTesting: false,
       }
     }
     if (this.isLoadingInterstitial == false && (this.platform.is('android') || this.platform.is('ios'))) {
@@ -357,13 +304,15 @@ export class AdmobService {
   async prepareConfigRewardvideo() {
     if (this.platform.is('ios')) {
       this.optionsRewardvideo = {
-        adId: this.admob.rewardVideo.ios
+        adId: this.admob.rewardVideo.ios,
+        isTesting: false,
       };
     }
     if (this.platform.is('android')) {
       // storico
       this.optionsRewardvideo = {
-        adId: this.admob.rewardVideo.android
+        adId: this.admob.rewardVideo.android,
+        isTesting: false,
       };
     }
 
