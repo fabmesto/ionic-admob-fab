@@ -53,8 +53,8 @@
   "homepage": "https://github.com/fabmesto/ionic-admob-fab",
   "dependencies": {
     "@capacitor/cli": "^3.1.2",
-    "@capacitor/device": "^1.0.1",
-    "@capacitor/dialog": "^1.0.1",
-    "@capacitor/storage": "^1.0.1"
+    "@capacitor/device": "^1.0.2",
+    "@capacitor/dialog": "^1.0.2",
+    "@capacitor/storage": "^1.0.3"
   }
 }
