@@ -30,9 +30,9 @@ export class AdmobService {
 
   nascondiADV = false;
   defaulCacheTime = (60 * 5);
-  optionsBanner: BannerAdOptions;
-  optionsInterstitial: AdOptions;
-  optionsRewardvideo: AdOptions;
+  optionsBanner: BannerAdOptions = null;
+  optionsInterstitial: AdOptions = null;
+  optionsRewardvideo: AdOptions = null;
 
   admob: admobInterface;
 
@@ -61,19 +61,19 @@ export class AdmobService {
     this.nascondiADV = false;
   }
 
-  init() {
+  async init(): Promise<boolean> {
     this.nascondiADV = this.acquistiService.isValidLocalPurchase(this.inAppProductId);
     if (this.nascondiADV == false) {
       if (this.platform.is('android') || this.platform.is('ios')) {
-        AdMob.initialize({
+        await AdMob.initialize({
           requestTrackingAuthorization: true,
           initializeForTesting: false,
-        }).then(() => {
-          this.registerBannerSizeChanged();
-          this.registerRewardListeners();
-          this.prepareConfigBanner();
-          this.prepareConfigRewardvideo();
         })
+
+        this.registerBannerSizeChanged();
+        this.registerRewardListeners();
+        this.prepareConfigBanner();
+        this.prepareConfigRewardvideo();
 
         setTimeout(() => {
           this.acquistiService.validatorLocalPurchase(this.callbackValidator, this.inAppProductId);
@@ -82,8 +82,11 @@ export class AdmobService {
         setTimeout(() => {
           this.acquistiService.alertInvalidLocalPurchase(this.inAppProductId);
         }, 6000);
+
+        return true;
       }
     }
+    return false;
   }
 
   private registerRewardListeners(): void {
@@ -169,15 +172,17 @@ export class AdmobService {
   async showBanner() {
     if (this.nascondiADV == false) {
       if (this.platform.is('android') || this.platform.is('ios')) {
-        console.log('showBanner banner con queste options', this.optionsBanner);
+        console.log('showBanner con queste options', this.optionsBanner);
 
-        const result = await AdMob.showBanner(this.optionsBanner).
-          catch(e => console.error(e));
+        if (this.optionsBanner != null) {
+          const result = await AdMob.showBanner(this.optionsBanner).
+            catch(e => console.error(e));
 
-        if (result === undefined) {
-          return;
+          if (result === undefined) {
+            return;
+          }
+          this.isPrepareBanner = true;
         }
-        this.isPrepareBanner = true;
       }
     }
   }
