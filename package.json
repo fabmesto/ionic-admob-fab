@@ -24,7 +24,7 @@
     "@ionic-native/in-app-purchase-2": "^5.36.0",
     "@ionic/angular": "^5.8.1",
     "@types/node": "^12.11.1",
-    "ionic-wp": "^0.3.5",
+    "ionic-wp": "^0.4.0",
     "moment": "^2.29.1",
     "rxjs": "~6.6.3",
     "typescript": "^4.0.8",
