@@ -1,4 +1,4 @@
-import { CacheService } from 'ionic-wp';
+import { CapacitorCacheService } from 'ionic-wp';
 import { Injectable, NgZone } from '@angular/core';
 import {
   AdMob,
@@ -52,7 +52,7 @@ export class AdmobService {
   public isPrepareReward = false;
 
   constructor(
-    public cache: CacheService,
+    public cache: CapacitorCacheService,
     public acquistiService: AcquistiValidatorService,
     public readonly ngZone: NgZone
   ) {
