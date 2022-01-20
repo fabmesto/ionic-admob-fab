@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2",
+  "version": "2.0.4",
   "author": {
     "name": "Fabrizio Mesto"
   },
@@ -22,9 +22,9 @@
     "@capacitor/core": "^3.3.1",
     "@ionic-native/core": "^5.36.0",
     "@ionic-native/in-app-purchase-2": "^5.36.0",
-    "@ionic/angular": "^5.8.4",
+    "@ionic/angular": "^6.0.3",
     "@types/node": "^12.11.1",
-    "ionic-wp": "^2.0.3",
+    "ionic-wp": "^2.0.4",
     "moment": "^2.29.1",
     "rxjs": "~6.6.3",
     "typescript": "^4.3.5",
@@ -52,8 +52,8 @@
   },
   "homepage": "https://github.com/fabmesto/ionic-admob-fab",
   "dependencies": {
-    "@capacitor/cli": "^3.3.1",
-    "@capacitor/device": "^1.0.6",
+    "@capacitor/cli": "^3.4.0",
+    "@capacitor/device": "^1.1.1",
     "@capacitor/dialog": "^1.0.6",
     "@capacitor/storage": "^1.2.3"
   }
