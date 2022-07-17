@@ -3,7 +3,7 @@
   "author": {
     "name": "Fabrizio Mesto"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "deprecated": false,
   "description": "Ionic Admob Services",
   "devDependencies": {
@@ -24,7 +24,7 @@
     "@ionic-native/in-app-purchase-2": "^5.36.0",
     "@ionic/angular": "^6.0.3",
     "@types/node": "^12.11.1",
-    "ionic-wp": "^2.0.4",
+    "ionic-wp": "^2.1.0",
     "moment": "^2.29.1",
     "rxjs": "~6.6.3",
     "typescript": "^4.3.5",
