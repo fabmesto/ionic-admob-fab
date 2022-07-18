@@ -376,7 +376,7 @@ export class AdmobService {
 
   async aggiungiPremio(premio: number) {
     const amount = await this.getLocalPremio();
-    this.saveLocalPremio((amount + premio)).finally(
+    this.saveLocalPremio((amount + premio)).then(
       () => { this.premioRicevutoEvent.next(premio); }
     );
     this.saveRemotePremio((amount + premio));
@@ -401,7 +401,7 @@ export class AdmobService {
   async usaPremio(valore: number) {
     const amount = await this.getLocalPremio();
     if (amount >= valore) {
-      this.saveLocalPremio((amount - valore)).finally(
+      this.saveLocalPremio((amount - valore)).then(
         () => {
           this.premioAggiornatoEvent.next((amount - valore));
           this.premioUsatoEvent.next(valore);
