@@ -1,5 +1,5 @@
 {
-  "version": "4.0.0",
+  "version": "4.0.2",
   "author": {
     "name": "Fabrizio Mesto"
   },
@@ -27,25 +27,26 @@
   },
   "homepage": "https://github.com/fabmesto/ionic-admob-fab",
   "devDependencies": {
-    "@angular/forms": "^14.2.1",
-    "@angular/platform-browser": "^14.2.1",
-    "@angular/router": "^14.2.1",
-    "@ionic-native/core": "^5.36.0",
+    "@angular/forms": "^14.2.4",
+    "@angular/platform-browser": "^14.2.4",
+    "@angular/router": "^14.2.4",
+    "@types/node": "^18.7.23",
     "zone.js": "^0.11.8"
   },
   "dependencies": {
-    "@angular/compiler": "^14.2.1",
-    "@angular/compiler-cli": "^14.2.1",
-    "@angular/core": "^14.2.1",
+    "@angular/compiler": "^14.2.4",
+    "@angular/compiler-cli": "^14.2.4",
+    "@angular/core": "^14.2.4",
+    "@awesome-cordova-plugins/core": "^5.45.0",
+    "@awesome-cordova-plugins/in-app-purchase-2": "^5.45.0",
     "@capacitor-community/admob": "^4.0.0",
-    "@capacitor/core": "^4.2.0",
+    "@capacitor/core": "^4.3.0",
     "@capacitor/device": "^4.0.1",
     "@capacitor/dialog": "^4.0.1",
-    "@ionic-native/in-app-purchase-2": "^5.36.0",
-    "@ionic/angular": "^6.2.6",
-    "ionic-wp": "^4.0.0",
+    "@ionic/angular": "^6.2.9",
+    "ionic-wp": "^4.0.1",
     "moment": "^2.29.4",
-    "rxjs": "^7.5.6",
-    "typescript": "^4.8.3"
+    "rxjs": "^7.5.7",
+    "typescript": "^4.8.4"
   }
 }

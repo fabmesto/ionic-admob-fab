@@ -3,7 +3,7 @@ import { Platform } from '@ionic/angular';
 import { acquistoModel } from './acquistoModel';
 import { WordpressService } from 'ionic-wp';
 import * as moment from 'moment';
-import { InAppPurchase2 } from '@ionic-native/in-app-purchase-2/ngx';
+import { InAppPurchase2 } from '@awesome-cordova-plugins/in-app-purchase-2/ngx';
 import { Dialog } from '@capacitor/dialog';
 
 @Injectable({
