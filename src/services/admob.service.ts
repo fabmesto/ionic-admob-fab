@@ -11,7 +11,8 @@ import {
   InterstitialAdPluginEvents,
   AdLoadInfo,
   RewardAdPluginEvents,
-  AdOptions
+  AdOptions,
+  AdmobConsentStatus
 } from '@capacitor-community/admob';
 
 import { Subject } from 'rxjs';
@@ -68,16 +69,24 @@ export class AdmobService {
     return (this.platform != 'web');
   }
 
+  async showConsent() {
+    const consentInfo = await AdMob.requestConsentInfo();
+
+    if (consentInfo.isConsentFormAvailable && consentInfo.status === AdmobConsentStatus.REQUIRED) {
+      const { status } = await AdMob.showConsentForm();
+      return status;
+    }
+  }
+
   async init(): Promise<boolean> {
     await this.setDevicePlatform();
     if (this.isRealDevice()) {
       this.nascondiADV = this.acquistiService.isValidLocalPurchase(this.inAppProductId);
       if (this.nascondiADV == false) {
         await AdMob.initialize({
-          requestTrackingAuthorization: true,
           initializeForTesting: false,
         })
-
+        await this.showConsent();
         this.registerBannerSizeChanged();
         this.registerRewardListeners();
         this.prepareConfigBanner();
